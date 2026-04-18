@@ -186,6 +186,10 @@ brew install ai-terminal
 A fully-featured headless CLI for use inside any existing terminal.
 
 ```
+npm install -g ai-terminal-app
+```
+
+```
 USAGE
   ait [OPTIONS] [QUERY...]
   command 2>&1 | ait --analyze
