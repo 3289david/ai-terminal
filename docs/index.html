@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Terminal — Native macOS Terminal with AI Brain</title>
+<meta name="description" content="A native macOS terminal with 23 AI providers built in. Errors get analyzed. Commands get explained. Built with SwiftUI + real PTY.">
+<meta name="theme-color" content="#0D1117">
+<meta property="og:title" content="AI Terminal — Native macOS Terminal with AI Brain">
+<meta property="og:description" content="23 AI providers. Real PTY. Auto error detection. Safety layer. Memory store. All in one native macOS app.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0D1117;--bg2:#010409;--surface:#161B22;--card:#1C2333;--input:#21262D;
+  --text:#E6EDF3;--text2:#8B949E;--muted:#484F58;
+  --accent:#58A6FF;--green:#3FB950;--red:#F85149;--purple:#BC8CFF;
+  --cyan:#39D2C0;--orange:#D29922;--border:#30363D;--border2:#21262D;
+  --glow:rgba(88,166,255,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none;transition:color .15s}a:hover{color:#79b8ff;text-decoration:none}
+::selection{background:rgba(88,166,255,.3)}
+
+/* ── Navigation ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(13,17,23,.8);border-bottom:1px solid var(--border2)}
+nav .nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;color:var(--text)}
+nav .logo span{font-size:1.3rem}
+nav .nav-links{display:flex;gap:24px;align-items:center}
+nav .nav-links a{color:var(--text2);font-size:.9rem;font-weight:500}nav .nav-links a:hover{color:var(--text)}
+nav .nav-cta{background:var(--accent);color:#fff;padding:7px 18px;border-radius:6px;font-size:.85rem;font-weight:600}nav .nav-cta:hover{background:#4794e6}
+@media(max-width:768px){nav .nav-links{display:none}}
+
+/* ── Hero ── */
+.hero{text-align:center;padding:140px 20px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(88,166,255,.07) 0%,rgba(188,140,255,.03) 40%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.hero .version-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:500;color:var(--accent);background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);margin-bottom:24px}
+.hero h1{font-size:4rem;font-weight:800;letter-spacing:-.03em;margin-bottom:16px;line-height:1.1}
+.hero h1 .gradient{background:linear-gradient(135deg,var(--accent) 0%,var(--purple) 50%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .subtitle{font-size:1.25rem;color:var(--text2);max-width:640px;margin:0 auto 20px;line-height:1.7}
+.hero .sub2{font-size:.95rem;color:var(--muted);margin-bottom:36px}
+.hero .sub2 code{background:var(--surface);padding:2px 8px;border-radius:4px;font-size:.85rem;color:var(--text)}
+.badges{display:flex;gap:8px;justify-content:center;margin-bottom:36px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:600;border:1px solid var(--border);background:var(--surface)}
+.badge.sw{color:var(--orange)}.badge.pr{color:var(--green)}.badge.nt{color:var(--cyan)}.badge.mt{color:var(--purple)}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;font-size:1rem;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 0 20px rgba(88,166,255,.2)}.btn-primary:hover{background:#4794e6;box-shadow:0 0 30px rgba(88,166,255,.3);transform:translateY(-1px)}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn svg{width:18px;height:18px}
+
+/* ── Terminal Preview ── */
+.preview{max-width:900px;margin:0 auto 0;padding:0 20px;position:relative}
+.preview::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120%;height:120%;background:radial-gradient(ellipse,rgba(88,166,255,.04),transparent 60%);pointer-events:none;z-index:-1}
+.terminal-frame{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03) inset}
+.terminal-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border)}
+.dot{width:12px;height:12px;border-radius:50%}.dot.r{background:#F85149}.dot.y{background:#D29922}.dot.g{background:#3FB950}
+.terminal-bar .title{margin-left:auto;font-size:.75rem;color:var(--muted);font-family:'SF Mono',Menlo,monospace}
+.terminal-body{padding:20px 24px;font-family:'SF Mono','Fira Code',Menlo,Consolas,monospace;font-size:.85rem;line-height:1.9}
+.terminal-body .prompt{color:var(--green);font-weight:600}
+.terminal-body .cmd{color:var(--text)}
+.terminal-body .err{color:var(--red)}
+.terminal-body .ai{color:var(--accent)}
+.terminal-body .dim{color:var(--muted)}
+.terminal-body .cyan{color:var(--cyan)}
+.terminal-body .purple{color:var(--purple)}
+.terminal-body .safe{color:var(--green);font-weight:600}
+.terminal-body .blocked{color:var(--red);font-weight:600;background:rgba(248,81,73,.1);padding:1px 6px;border-radius:3px}
+.terminal-body .warn{color:var(--orange)}
+
+/* ── Sections ── */
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+section{padding:100px 0;position:relative}
+section h2{font-size:2.2rem;font-weight:700;text-align:center;margin-bottom:12px;letter-spacing:-.01em}
+section h2 .gradient{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+section .section-sub{text-align:center;color:var(--text2);font-size:1.05rem;max-width:600px;margin:0 auto 52px}
+
+/* ── Feature Grid ── */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature{padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:12px;transition:all .2s}
+.feature:hover{border-color:rgba(88,166,255,.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.feature .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:1.3rem}
+.feature h3{font-size:.95rem;font-weight:600;margin-bottom:8px}
+.feature p{font-size:.85rem;color:var(--text2);line-height:1.6}
+@media(max-width:900px){.features{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.features{grid-template-columns:1fr}}
+
+/* ── Provider Grid ── */
+.provider-section{background:var(--bg2)}
+.provider-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.provider-card{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;transition:all .15s}
+.provider-card:hover{border-color:rgba(88,166,255,.3);transform:translateY(-1px)}
+.provider-card .dot-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.provider-card .name{font-weight:600;font-size:.9rem}
+.provider-card .meta{font-size:.75rem;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:2px}
+.cat-label{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.cat-local{background:rgba(57,210,192,.12);color:var(--cyan)}
+.cat-free{background:rgba(63,185,80,.12);color:var(--green)}
+.cat-cloud{background:rgba(88,166,255,.12);color:var(--accent)}
+.cat-fast{background:rgba(210,153,34,.12);color:var(--orange)}
+.cat-agg{background:rgba(188,140,255,.12);color:var(--purple)}
+
+/* ── CLI Section ── */
+.cli-section{background:var(--bg)}
+.cli-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.cli-info h3{font-size:1.3rem;font-weight:700;margin-bottom:12px}
+.cli-info p{color:var(--text2);margin-bottom:20px;line-height:1.7}
+.cli-flags{display:flex;flex-direction:column;gap:8px}
+.cli-flag{display:flex;gap:12px;align-items:baseline;font-size:.85rem}
+.cli-flag code{color:var(--cyan);font-family:'SF Mono',Menlo,monospace;white-space:nowrap;min-width:170px}
+.cli-flag span{color:var(--text2)}
+.cli-demo{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;font-family:'SF Mono','Fira Code',Menlo,monospace;font-size:.82rem;line-height:2}
+.cli-demo .c{color:var(--muted)}
+.cli-demo .g{color:var(--green)}
+.cli-demo .w{color:var(--text)}
+.cli-demo .r{color:var(--red)}
+.cli-demo .b{color:var(--accent)}
+.cli-demo .y{color:var(--orange)}
+@media(max-width:768px){.cli-grid{grid-template-columns:1fr}}
+
+/* ── Safety Section ── */
+.safety-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:900px;margin:0 auto}
+.safety-card{padding:24px;border-radius:12px;border:1px solid var(--border);text-align:center}
+.safety-card.blocked{background:rgba(248,81,73,.06);border-color:rgba(248,81,73,.2)}
+.safety-card.caution{background:rgba(210,153,34,.06);border-color:rgba(210,153,34,.2)}
+.safety-card.safe{background:rgba(63,185,80,.06);border-color:rgba(63,185,80,.2)}
+.safety-card .level{font-size:1.6rem;margin-bottom:8px}
+.safety-card h3{font-size:.95rem;font-weight:700;margin-bottom:8px}
+.safety-card p{font-size:.8rem;color:var(--text2);line-height:1.5}
+.safety-card code{font-size:.75rem;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px}
+@media(max-width:600px){.safety-grid{grid-template-columns:1fr}}
+
+/* ── Install Section ── */
+.install-section{background:var(--bg2)}
+.install-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:800px;margin:0 auto}
+.install-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;transition:all .15s}
+.install-card:hover{border-color:rgba(88,166,255,.3)}
+.install-card h3{font-size:.95rem;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.install-card .tag{font-size:.7rem;padding:2px 8px;border-radius:4px;background:rgba(88,166,255,.1);color:var(--accent);font-weight:600}
+.install-card p{font-size:.8rem;color:var(--text2);margin-bottom:12px}
+.install-card pre{background:var(--card);border:1px solid var(--border2);border-radius:6px;padding:12px 16px;font-family:'SF Mono',Menlo,monospace;font-size:.8rem;overflow-x:auto;color:var(--green)}
+@media(max-width:600px){.install-grid{grid-template-columns:1fr}}
+
+/* ── Architecture ── */
+.arch-block{max-width:700px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;font-family:'SF Mono','Fira Code',Menlo,monospace;font-size:.82rem;line-height:1.8;color:var(--text2)}
+.arch-block .dir{color:var(--accent);font-weight:600}
+.arch-block .file{color:var(--text)}
+.arch-block .comment{color:var(--muted);font-style:italic}
+
+/* ── Footer ── */
+footer{text-align:center;padding:48px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
+footer a{color:var(--text2)}footer a:hover{color:var(--accent)}
+footer .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero h1,.hero .subtitle,.hero .sub2,.badges,.btn-row{animation:fadeUp .6s ease both}
+.hero .subtitle{animation-delay:.1s}.hero .sub2{animation-delay:.15s}.badges{animation-delay:.2s}.btn-row{animation-delay:.3s}
+
+/* ── Stats bar ── */
+.stats{display:flex;justify-content:center;gap:48px;padding:40px 20px;border-bottom:1px solid var(--border)}
+.stat{text-align:center}
+.stat .num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat .label{font-size:.8rem;color:var(--muted);margin-top:2px}
+@media(max-width:600px){.stats{gap:24px}.stat .num{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span>⚡</span> AI Terminal</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#providers">Providers</a>
+      <a href="#cli">CLI</a>
+      <a href="#safety">Safety</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/danwoo1234/ai-terminal" class="nav-cta">
+        <svg style="width:14px;height:14px;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="version-badge">✦ v2.0 — Native .app + CLI + 23 Providers</div>
+  <h1>The AI-Powered<br><span class="gradient">Terminal .app</span></h1>
+  <p class="subtitle">A native macOS application with 23 AI providers built in. Errors get analyzed. Commands get explained. Dangerous operations get blocked. Drag to Applications — done.</p>
+  <p class="sub2">Built with <code>SwiftUI</code> + real <code>forkpty()</code>. Ships as a real <code>.app</code> bundle. No Electron. No web views.</p>
+  <div class="badges">
+    <span class="badge sw">⬡ Swift 5.9+</span>
+    <span class="badge pr">◆ 23 Providers</span>
+    <span class="badge nt">▣ Native macOS</span>
+    <span class="badge mt">◇ MIT License</span>
+  </div>
+  <div class="btn-row">
+    <a href="#install" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Get Started
+    </a>
+    <a href="https://github.com/danwoo1234/ai-terminal" class="btn btn-secondary">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      View Source
+    </a>
+  </div>
+</section>
+
+<!-- ── Stats ── -->
+<div class="stats">
+  <div class="stat"><div class="num">23</div><div class="label">AI Providers</div></div>
+  <div class="stat"><div class="num">5</div><div class="label">Client Types</div></div>
+  <div class="stat"><div class="num">26</div><div class="label">Error Patterns</div></div>
+  <div class="stat"><div class="num">0</div><div class="label">Electron</div></div>
+</div>
+
+<!-- ── Terminal Preview ── -->
+<section>
+  <div class="preview">
+    <div class="terminal-frame">
+      <div class="terminal-bar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <span class="title">AI Terminal — zsh — ~/project</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="prompt">❯</span> <span class="cmd">npm run build</span></div>
+        <div>&nbsp;</div>
+        <div><span class="err">ERROR in src/index.ts(42,5)</span></div>
+        <div><span class="err">TS2345: Argument of type 'string' is not assignable</span></div>
+        <div><span class="err">to parameter of type 'number'.</span></div>
+        <div>&nbsp;</div>
+        <div><span class="dim">── AI detected error. Analyzing with Groq (0.3s) ──</span></div>
+        <div>&nbsp;</div>
+        <div><span class="ai">TypeScript found a type mismatch on line 42. You're passing</span></div>
+        <div><span class="ai">a string where a number is expected.</span></div>
+        <div>&nbsp;</div>
+        <div><span class="purple">  ```bash</span></div>
+        <div><span class="cyan">  sed -i '' 's/userId/Number(userId)/' src/index.ts</span> <span class="safe">✓ Safe</span></div>
+        <div><span class="purple">  ```</span></div>
+        <div>&nbsp;</div>
+        <div><span class="dim">[▶ Run] [📋 Copy] [💡 Explain]</span> <span class="dim">Groq · llama-3.3-70b · 0.3s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section id="features">
+  <div class="container">
+    <h2>Why AI <span class="gradient">Terminal</span>?</h2>
+    <p class="section-sub">Every feature a developer needs, built into one native terminal.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="icon" style="background:rgba(139,92,246,.1)">📦</div>
+        <h3>Native .app Bundle</h3>
+        <p>Real macOS application — shows in Dock, Launchpad, Spotlight. Custom app icon. Just drag to /Applications.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(88,166,255,.1)">🖥️</div>
+        <h3>Real PTY Terminal</h3>
+        <p>Full zsh with login shell, ANSI 256-color, tab completion, and command history. Native forkpty() — not a web view or emulator.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(63,185,80,.1)">🤖</div>
+        <h3>23 AI Providers</h3>
+        <p>From local Ollama to cloud GPT-4o, Claude, Gemini, Groq, DeepSeek and 17 more. Auto mode picks the best available provider.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(248,81,73,.1)">🔍</div>
+        <h3>Auto Error Detection</h3>
+        <p>26 regex patterns detect errors in terminal output — tracebacks, compiler errors, exit codes. One-click AI analysis.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(188,140,255,.1)">🛡️</div>
+        <h3>Safety Layer</h3>
+        <p>Blocks rm -rf /, fork bombs, dd on disks. Warns on sudo, force pushes, DROP TABLE. Detects leaked API keys and tokens.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(57,210,192,.1)">🧠</div>
+        <h3>Memory Store</h3>
+        <p>Remembers past errors and solutions in a persistent JSON store. Feeds them back to AI for smarter, project-aware answers.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(210,153,34,.1)">⚡</div>
+        <h3>Token Streaming</h3>
+        <p>AI responses stream token-by-token in real time via SSE. Groq and Cerebras deliver full answers in under a second.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(88,166,255,.1)">💡</div>
+        <h3>Command Extraction</h3>
+        <p>AI extracts runnable commands from its responses with safety ratings. Run, copy, or explain with one click.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(63,185,80,.1)">📂</div>
+        <h3>Context Engine</h3>
+        <p>Auto-detects project type (Node, Python, Rust, Go, Swift, etc.), git branch, and dependencies. AI gets full context.</p>
+      </div>
+      <div class="feature">
+        <div class="icon" style="background:rgba(248,81,73,.1)">📑</div>
+        <h3>Multi-Session</h3>
+        <p>Open multiple terminal tabs, each with its own PTY process, AI conversation, and command history.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Providers ── -->
+<section class="provider-section" id="providers">
+  <div class="container">
+    <h2>23 <span class="gradient">Providers</span></h2>
+    <p class="section-sub">Local, cloud, or free — pick the AI that fits your workflow.</p>
+    <div class="provider-grid">
+      <div class="provider-card"><div class="dot-status" style="background:var(--cyan)"></div><div><div class="name">Ollama</div><div class="meta"><span class="cat-label cat-local">Local</span> Free, offline</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--cyan)"></div><div><div class="name">LM Studio</div><div class="meta"><span class="cat-label cat-local">Local</span> Free, offline</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--green)"></div><div><div class="name">Pollinations</div><div class="meta"><span class="cat-label cat-free">Free</span> No key needed</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">OpenAI</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> GPT-4o</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">Anthropic</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> Claude Sonnet</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">Google Gemini</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> Gemini 2.0</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">Mistral</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> Codestral</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">xAI</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> Grok-3</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">DeepSeek</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> V3, R1</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">Cohere</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> Command R+</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--accent)"></div><div><div class="name">AI21</div><div class="meta"><span class="cat-label cat-cloud">Cloud</span> Jamba 1.5</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--orange)"></div><div><div class="name">Groq</div><div class="meta"><span class="cat-label cat-fast">Fast</span> &lt;1s responses</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--orange)"></div><div><div class="name">Cerebras</div><div class="meta"><span class="cat-label cat-fast">Fast</span> Ultra-fast</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--orange)"></div><div><div class="name">SambaNova</div><div class="meta"><span class="cat-label cat-fast">Fast</span> Enterprise</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--orange)"></div><div><div class="name">Fireworks</div><div class="meta"><span class="cat-label cat-fast">Fast</span> Inference</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--orange)"></div><div><div class="name">Together</div><div class="meta"><span class="cat-label cat-fast">Fast</span> 100+ models</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--orange)"></div><div><div class="name">Lepton</div><div class="meta"><span class="cat-label cat-fast">Fast</span> Serverless</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--purple)"></div><div><div class="name">OpenRouter</div><div class="meta"><span class="cat-label cat-agg">Hub</span> 200+ models</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--purple)"></div><div><div class="name">DeepInfra</div><div class="meta"><span class="cat-label cat-agg">Hub</span> Open models</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--purple)"></div><div><div class="name">Perplexity</div><div class="meta"><span class="cat-label cat-agg">Hub</span> Search AI</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--purple)"></div><div><div class="name">HuggingFace</div><div class="meta"><span class="cat-label cat-agg">Hub</span> Open-source</div></div></div>
+      <div class="provider-card"><div class="dot-status" style="background:var(--purple)"></div><div><div class="name">Replicate</div><div class="meta"><span class="cat-label cat-agg">Hub</span> Run anything</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CLI ── -->
+<section class="cli-section" id="cli">
+  <div class="container">
+    <h2>Full-Featured <span class="gradient">CLI</span></h2>
+    <p class="section-sub">Use AI Terminal inside your existing terminal. Every feature, headless.</p>
+    <div class="cli-grid">
+      <div class="cli-info">
+        <h3>Install: <code style="color:var(--cyan)">ait</code></h3>
+        <p>The CLI version has every feature from the GUI — safety layer, memory store, context engine, all 23 providers with streaming, interactive REPL, and piped error analysis.</p>
+        <div class="cli-flags">
+          <div class="cli-flag"><code>ait "question"</code> <span>Ask the AI anything</span></div>
+          <div class="cli-flag"><code>ait -i</code> <span>Interactive REPL mode</span></div>
+          <div class="cli-flag"><code>ait --analyze</code> <span>Analyze piped input</span></div>
+          <div class="cli-flag"><code>ait --explain CMD</code> <span>Explain a command</span></div>
+          <div class="cli-flag"><code>ait --run CMD</code> <span>Run with AI error analysis</span></div>
+          <div class="cli-flag"><code>ait --safety CMD</code> <span>Check command safety</span></div>
+          <div class="cli-flag"><code>ait --provider NAME</code> <span>Pick a specific provider</span></div>
+          <div class="cli-flag"><code>ait --config</code> <span>Configure API keys</span></div>
+        </div>
+      </div>
+      <div class="cli-demo">
+        <div><span class="c"># Ask a question</span></div>
+        <div><span class="g">$</span> <span class="w">ait "find large files on macOS"</span></div>
+        <div>&nbsp;</div>
+        <div><span class="c"># Pipe errors for analysis</span></div>
+        <div><span class="g">$</span> <span class="w">npm run build 2>&1 | ait --analyze</span></div>
+        <div>&nbsp;</div>
+        <div><span class="c"># Safety check</span></div>
+        <div><span class="g">$</span> <span class="w">ait --safety "rm -rf /"</span></div>
+        <div><span class="r">  ✕ BLOCKED: Recursive deletion from root</span></div>
+        <div>&nbsp;</div>
+        <div><span class="g">$</span> <span class="w">ait --safety "git push --force"</span></div>
+        <div><span class="y">  ⚠ Caution: Force push to remote</span></div>
+        <div>&nbsp;</div>
+        <div><span class="c"># Interactive mode</span></div>
+        <div><span class="g">$</span> <span class="w">ait -i</span></div>
+        <div><span class="b">❯</span> <span class="w">!cargo build</span></div>
+        <div><span class="r">error[E0308]: mismatched types</span></div>
+        <div><span class="b">Analyzing with Groq...</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Safety ── -->
+<section id="safety" style="background:var(--bg2)">
+  <div class="container">
+    <h2>Built-In <span class="gradient">Safety</span></h2>
+    <p class="section-sub">Every command is evaluated before execution. Secrets are scanned in real time.</p>
+    <div class="safety-grid">
+      <div class="safety-card blocked">
+        <div class="level">✕</div>
+        <h3 style="color:var(--red)">Blocked</h3>
+        <p>Prevented from running. No override.</p>
+        <p style="margin-top:8px"><code>rm -rf /</code> <code>:(){ :|:& };:</code><br><code>mkfs</code> <code>dd of=/dev/sda</code></p>
+      </div>
+      <div class="safety-card caution">
+        <div class="level">⚠</div>
+        <h3 style="color:var(--orange)">Caution</h3>
+        <p>Warning shown. Confirmation required.</p>
+        <p style="margin-top:8px"><code>sudo</code> <code>git push --force</code><br><code>DROP TABLE</code> <code>curl | sh</code></p>
+      </div>
+      <div class="safety-card safe">
+        <div class="level">✓</div>
+        <h3 style="color:var(--green)">Safe</h3>
+        <p>Runs normally. No intervention.</p>
+        <p style="margin-top:8px"><code>ls -la</code> <code>git status</code><br><code>npm install</code> <code>cargo build</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Install ── -->
+<section class="install-section" id="install">
+  <div class="container">
+    <h2>Get <span class="gradient">Started</span></h2>
+    <p class="section-sub">macOS 14+ and Swift 5.9+. Build once, drag to Applications.</p>
+    <div class="install-grid">
+      <div class="install-card">
+        <h3>Download .dmg <span class="tag">Easiest</span></h3>
+        <p>Build a drag-to-install DMG — open it and drag to Applications.</p>
+        <pre>git clone https://github.com/danwoo1234/ai-terminal
+cd ai-terminal
+make dmg</pre>
+      </div>
+      <div class="install-card">
+        <h3>Install the .app</h3>
+        <p>Build the .app and copy it directly to /Applications.</p>
+        <pre>make install
+# opens from Dock, Launchpad, Spotlight</pre>
+      </div>
+      <div class="install-card">
+        <h3>Install CLI (<code style="color:var(--cyan)">ait</code>)</h3>
+        <p>Headless CLI with all features for any terminal.</p>
+        <pre>make install-cli
+# installs ait to /usr/local/bin
+ait --help</pre>
+      </div>
+      <div class="install-card">
+        <h3>Homebrew</h3>
+        <p>One command install via tap (coming soon).</p>
+        <pre>brew tap danwoo1234/tap
+brew install ai-terminal</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture ── -->
+<section>
+  <div class="container">
+    <h2>Under the <span class="gradient">Hood</span></h2>
+    <p class="section-sub">Clean architecture. Easy to extend. Add a provider in 5 lines.</p>
+    <div class="arch-block">
+<span class="dir">.</span>
+├── <span class="file">Package.swift</span>                  <span class="comment"># SPM manifest</span>
+├── <span class="file">Makefile</span>                       <span class="comment"># make app / make install / make run</span>
+├── <span class="dir">Scripts/</span>
+│   ├── <span class="file">build-app.sh</span>               <span class="comment"># Assembles AI Terminal.app</span>
+│   └── <span class="file">generate-icon.swift</span>        <span class="comment"># CoreGraphics icon generator</span>
+├── <span class="dir">Sources/</span>
+│   ├── <span class="dir">CPty/</span>                      <span class="comment"># C wrapper around forkpty()</span>
+│   ├── <span class="dir">AITerminal/</span>                <span class="comment"># SwiftUI macOS app</span>
+│   │   ├── <span class="file">AITerminalApp.swift</span>    <span class="comment"># @main entry point</span>
+│   │   ├── <span class="dir">Models/</span>
+│   │   │   ├── <span class="file">AIProvider.swift</span>   <span class="comment"># 23 provider definitions</span>
+│   │   │   ├── <span class="file">AppState.swift</span>     <span class="comment"># @Observable app state</span>
+│   │   │   └── <span class="file">Message.swift</span>      <span class="comment"># Message types</span>
+│   │   ├── <span class="dir">Services/</span>
+│   │   │   ├── <span class="file">AIRouter.swift</span>     <span class="comment"># Routes to correct client</span>
+│   │   │   ├── <span class="file">SafetyLayer.swift</span>  <span class="comment"># Command safety evaluation</span>
+│   │   │   ├── <span class="file">MemoryStore.swift</span>  <span class="comment"># Error/solution persistence</span>
+│   │   │   ├── <span class="file">ContextEngine.swift</span><span class="comment"># Project type detection</span>
+│   │   │   ├── <span class="file">ANSIParser.swift</span>   <span class="comment"># Full SGR + 256-color parser</span>
+│   │   │   └── <span class="file">*Client.swift</span>      <span class="comment"># 5 streaming client types</span>
+│   │   └── <span class="dir">Views/</span>
+│   │       ├── <span class="file">ContentView.swift</span>  <span class="comment"># Main split view layout</span>
+│   │       ├── <span class="file">TerminalView.swift</span> <span class="comment"># PTY terminal emulator</span>
+│   │       └── <span class="file">AIResponsePanel.swift</span><span class="comment"># Streaming AI side panel</span>
+│   └── <span class="dir">AITerminalCLI/</span>             <span class="comment"># Headless CLI (brew)</span>
+│       └── <span class="file">CLI.swift</span>              <span class="comment"># All features, one file</span>
+└── <span class="dir">docs/</span>
+    └── <span class="file">index.html</span>                <span class="comment"># GitHub Pages website</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="footer-links">
+    <a href="https://github.com/danwoo1234/ai-terminal">GitHub</a>
+    <a href="https://github.com/danwoo1234/ai-terminal/issues">Issues</a>
+    <a href="https://github.com/danwoo1234/ai-terminal/blob/main/LICENSE">MIT License</a>
+  </div>
+  <p>Built with Swift, SwiftUI, and a love for the terminal.</p>
+</footer>
+
+</body>
+</html>

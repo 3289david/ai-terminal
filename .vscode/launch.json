@@ -1,0 +1,84 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Debug AITerminal",
+            "target": "AITerminal",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug AITerminal"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Release AITerminal",
+            "target": "AITerminal",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release AITerminal"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Debug AITerminalCLI",
+            "target": "AITerminalCLI",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug AITerminalCLI"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Release AITerminalCLI",
+            "target": "AITerminalCLI",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release AITerminalCLI"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Debug ai-terminal",
+            "target": "ai-terminal",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug ai-terminal"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Release ai-terminal",
+            "target": "ai-terminal",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release ai-terminal"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Debug ait",
+            "target": "ait",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug ait"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:AI_TERMINAL}",
+            "name": "Release ait",
+            "target": "ait",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release ait"
+        }
+    ]
+}
