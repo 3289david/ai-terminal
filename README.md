@@ -6,6 +6,7 @@
 <img src="https://img.shields.io/badge/.app-Bundle-8B5CF6?style=flat-square" alt=".app Bundle">
 <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
 <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome">
+<a href="https://3289david.github.io/ai-terminal" target="_blank"><img src="https://img.shields.io/badge/Github%20Pages-Website-brightgreen?style=for-the-badge" alt="Website"></a>
 
 <br><br>
 
