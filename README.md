@@ -4,6 +4,7 @@
 <img src="https://img.shields.io/badge/macOS-14.0+-000000?style=flat-square&logo=apple&logoColor=white" alt="macOS 14+">
 <img src="https://img.shields.io/badge/Providers-23-blue?style=flat-square" alt="23 Providers">
 <img src="https://img.shields.io/badge/.app-Bundle-8B5CF6?style=flat-square" alt=".app Bundle">
+<img src="https://img.shields.io/npm/v/ai-terminal-app?style=flat-square&logo=npm&color=CB3837" alt="npm">
 <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
 <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome">
 <a href="https://3289david.github.io/ai-terminal" target="_blank"><img src="https://img.shields.io/badge/Github%20Pages-Website-brightgreen?style=for-the-badge" alt="Website"></a>
@@ -99,7 +100,16 @@ Built with SwiftUI + real PTY. 23 AI providers. Errors get analyzed. Commands ge
 
 ## 📦 Installation
 
-### Download the DMG (easiest)
+### npm (easiest)
+
+```bash
+npm install -g ai-terminal-app
+ait --help
+```
+
+Installs the `ait` CLI globally. Builds from source on `npm install` (requires Swift 5.9+). Works immediately after install.
+
+### Download the DMG
 
 ```bash
 git clone https://github.com/3289david/ai-terminal.git
@@ -109,30 +119,39 @@ make dmg
 
 This builds `AI Terminal-2.0.0.dmg` in `.build/`. Open it, drag **AI Terminal.app** to Applications — done.
 
+> **Auto CLI install**: When you launch the `.app` for the first time, it automatically installs `ait` to `/usr/local/bin/`. No extra steps needed — the CLI is ready to use in any terminal.
+
 ### Install the `.app` directly
 
 ```bash
 make install
 # Builds .app and copies to /Applications/AI Terminal.app
+# First launch auto-installs `ait` CLI to /usr/local/bin
 ```
 
 ### Build the `.app` manually
 
 ```bash
 make app                                       # Build .app to .build/
-open ".build/AI Terminal.app"                  # Launch it
+open ".build/AI Terminal.app"                  # Launch it (auto-installs ait CLI)
 cp -R ".build/AI Terminal.app" /Applications/  # Or install manually
 ```
 
 ### Install the CLI (`ait`)
 
 ```bash
+# Via npm (recommended)
+npm install -g ai-terminal-app
+
+# Or via Makefile
 make install-cli
 # installs `ait` to /usr/local/bin
 
 # Or build and copy manually:
-swift build -c release
+swift build -c release --product ait
 cp .build/release/ait /usr/local/bin/
+
+# Or just launch the .app — it auto-installs ait for you!
 ```
 
 ### Homebrew (coming soon)
@@ -147,7 +166,7 @@ brew install ai-terminal
 | Target | Description |
 |--------|-------------|
 | `make dmg` | Build `AI Terminal-2.0.0.dmg` drag-to-install package |
-| `make app` | Build `AI Terminal.app` in `.build/` |
+| `make app` | Build `AI Terminal.app` in `.build/` (bundles `ait` CLI inside) |
 | `make install` | Build `.app` and copy to `/Applications` |
 | `make run` | Build `.app` and launch it |
 | `make cli` | Build CLI binary (`ait`) |
@@ -296,9 +315,14 @@ Every command is evaluated before execution:
 ```
 .
 ├── Package.swift                  # SPM manifest
+├── package.json                   # npm package (npm i -g ai-terminal-app)
 ├── Makefile                       # Build targets (make app, make install)
+├── bin/
+│   └── ait                        # Node.js wrapper for npm bin
+├── scripts/
+│   └── postinstall.js             # Builds native binary on npm install
 ├── Scripts/
-│   ├── build-app.sh               # Assembles AI Terminal.app bundle
+│   ├── build-app.sh               # Assembles AI Terminal.app bundle (+ bundles ait CLI)
 │   └── generate-icon.swift        # Generates app icon via CoreGraphics
 ├── Resources/
 │   └── AITerminal.entitlements    # App sandbox entitlements
@@ -351,12 +375,14 @@ AI Terminal.app/
     ├── Info.plist                  # Bundle metadata + LSApplicationCategoryType
     ├── PkgInfo                    # APPL????
     ├── MacOS/
-    │   └── AITerminal             # Compiled Mach-O executable
+    │   ├── AITerminal             # Compiled Mach-O executable (GUI)
+    │   └── ait                    # CLI binary (auto-installed to /usr/local/bin on first launch)
     └── Resources/
         └── AppIcon.icns           # Generated app icon (10 sizes)
 ```
 
-The app shows in Dock, Launchpad, and Spotlight. No terminal needed to launch it.
+The app shows in Dock, Launchpad, and Spotlight. No terminal needed to launch it.  
+**On first launch, the `ait` CLI is automatically installed to `/usr/local/bin/`** so you can use it in any terminal immediately.
 
 ### How It Works
 

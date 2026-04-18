@@ -191,14 +191,15 @@ footer .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:
 
 <!-- ── Hero ── -->
 <section class="hero">
-  <div class="version-badge">✦ v2.0 — Native .app + CLI + 23 Providers</div>
+  <div class="version-badge">✦ v2.0 — Native .app + CLI + npm + 23 Providers</div>
   <h1>The AI-Powered<br><span class="gradient">Terminal .app</span></h1>
-  <p class="subtitle">A native macOS application with 23 AI providers built in. Errors get analyzed. Commands get explained. Dangerous operations get blocked. Drag to Applications — done.</p>
-  <p class="sub2">Built with <code>SwiftUI</code> + real <code>forkpty()</code>. Ships as a real <code>.app</code> bundle. No Electron. No web views.</p>
+  <p class="subtitle">A native macOS application with 23 AI providers built in. Errors get analyzed. Commands get explained. Dangerous operations get blocked. <code>npm install</code> or drag to Applications — done.</p>
+  <p class="sub2">Built with <code>SwiftUI</code> + real <code>forkpty()</code>. Ships as a real <code>.app</code> bundle. Available on <code>npm</code>. No Electron. No web views.</p>
   <div class="badges">
     <span class="badge sw">⬡ Swift 5.9+</span>
     <span class="badge pr">◆ 23 Providers</span>
     <span class="badge nt">▣ Native macOS</span>
+    <span class="badge" style="color:var(--red)">▪ npm</span>
     <span class="badge mt">◇ MIT License</span>
   </div>
   <div class="btn-row">
@@ -218,6 +219,7 @@ footer .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:
   <div class="stat"><div class="num">23</div><div class="label">AI Providers</div></div>
   <div class="stat"><div class="num">5</div><div class="label">Client Types</div></div>
   <div class="stat"><div class="num">26</div><div class="label">Error Patterns</div></div>
+  <div class="stat"><div class="num">npm</div><div class="label">Published</div></div>
   <div class="stat"><div class="num">0</div><div class="label">Electron</div></div>
 </div>
 
@@ -260,7 +262,7 @@ footer .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:
       <div class="feature">
         <div class="icon" style="background:rgba(139,92,246,.1)">📦</div>
         <h3>Native .app Bundle</h3>
-        <p>Real macOS application — shows in Dock, Launchpad, Spotlight. Custom app icon. Just drag to /Applications.</p>
+        <p>Real macOS application — shows in Dock, Launchpad, Spotlight. Custom app icon. Auto-installs <code>ait</code> CLI on first launch.</p>
       </div>
       <div class="feature">
         <div class="icon" style="background:rgba(88,166,255,.1)">🖥️</div>
@@ -351,7 +353,7 @@ footer .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:
     <div class="cli-grid">
       <div class="cli-info">
         <h3>Install: <code style="color:var(--cyan)">ait</code></h3>
-        <p>The CLI version has every feature from the GUI — safety layer, memory store, context engine, all 23 providers with streaming, interactive REPL, and piped error analysis.</p>
+        <p>The CLI version has every feature from the GUI — safety layer, memory store, context engine, all 23 providers with streaming, interactive REPL, and piped error analysis. Install via <code style="color:var(--cyan)">npm i -g ai-terminal-app</code> or the .app auto-installs it.</p>
         <div class="cli-flags">
           <div class="cli-flag"><code>ait "question"</code> <span>Ask the AI anything</span></div>
           <div class="cli-flag"><code>ait -i</code> <span>Interactive REPL mode</span></div>
@@ -419,10 +421,16 @@ footer .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:
 <section class="install-section" id="install">
   <div class="container">
     <h2>Get <span class="gradient">Started</span></h2>
-    <p class="section-sub">macOS 14+ and Swift 5.9+. Build once, drag to Applications.</p>
+    <p class="section-sub">macOS 14+ and Swift 5.9+. <code>npm install</code> or build once and drag to Applications.</p>
     <div class="install-grid">
       <div class="install-card">
-        <h3>Download .dmg <span class="tag">Easiest</span></h3>
+        <h3>npm install <span class="tag">Easiest</span></h3>
+        <p>One command. Installs <code style="color:var(--cyan)">ait</code> CLI globally. Builds from source.</p>
+        <pre>npm install -g ai-terminal-app
+ait --help</pre>
+      </div>
+      <div class="install-card">
+        <h3>Download .dmg</h3>
         <p>Build a drag-to-install DMG — open it and drag to Applications.</p>
         <pre>git clone https://github.com/3289david/ai-terminal
 cd ai-terminal
@@ -430,9 +438,9 @@ make dmg</pre>
       </div>
       <div class="install-card">
         <h3>Install the .app</h3>
-        <p>Build the .app and copy it directly to /Applications.</p>
+        <p>Build .app → copy to /Applications. <strong>Auto-installs <code style="color:var(--cyan)">ait</code> CLI on first launch.</strong></p>
         <pre>make install
-# opens from Dock, Launchpad, Spotlight</pre>
+# ait CLI auto-installed to /usr/local/bin</pre>
       </div>
       <div class="install-card">
         <h3>Install CLI (<code style="color:var(--cyan)">ait</code>)</h3>
@@ -440,12 +448,6 @@ make dmg</pre>
         <pre>make install-cli
 # installs ait to /usr/local/bin
 ait --help</pre>
-      </div>
-      <div class="install-card">
-        <h3>Homebrew</h3>
-        <p>One command install via tap (coming soon).</p>
-        <pre>brew tap 3289david/tap
-brew install ai-terminal</pre>
       </div>
     </div>
   </div>
@@ -459,9 +461,14 @@ brew install ai-terminal</pre>
     <div class="arch-block">
 <span class="dir">.</span>
 ├── <span class="file">Package.swift</span>                  <span class="comment"># SPM manifest</span>
+├── <span class="file">package.json</span>                   <span class="comment"># npm (npm i -g ai-terminal-app)</span>
 ├── <span class="file">Makefile</span>                       <span class="comment"># make app / make install / make run</span>
+├── <span class="dir">bin/</span>
+│   └── <span class="file">ait</span>                        <span class="comment"># Node.js wrapper for npm</span>
+├── <span class="dir">scripts/</span>
+│   └── <span class="file">postinstall.js</span>             <span class="comment"># Builds native binary on npm install</span>
 ├── <span class="dir">Scripts/</span>
-│   ├── <span class="file">build-app.sh</span>               <span class="comment"># Assembles AI Terminal.app</span>
+│   ├── <span class="file">build-app.sh</span>               <span class="comment"># Assembles AI Terminal.app (+ bundles ait)</span>
 │   └── <span class="file">generate-icon.swift</span>        <span class="comment"># CoreGraphics icon generator</span>
 ├── <span class="dir">Sources/</span>
 │   ├── <span class="dir">CPty/</span>                      <span class="comment"># C wrapper around forkpty()</span>

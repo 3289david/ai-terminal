@@ -41,10 +41,25 @@ rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-# ── Step 3: Copy executable ──
-echo "  [3/5] Copying executable..."
+# ── Step 3: Copy executables (GUI + CLI) ──
+echo "  [3/5] Copying executables..."
 cp "$RELEASE_DIR/$EXECUTABLE" "$APP_BUNDLE/Contents/MacOS/AITerminal"
 chmod +x "$APP_BUNDLE/Contents/MacOS/AITerminal"
+
+# Bundle the CLI binary inside the .app so it auto-installs on first launch
+if [ -f "$RELEASE_DIR/ait" ]; then
+    cp "$RELEASE_DIR/ait" "$APP_BUNDLE/Contents/MacOS/ait"
+    chmod +x "$APP_BUNDLE/Contents/MacOS/ait"
+    echo "  ✓ CLI binary (ait) bundled"
+else
+    echo "  ⚠ CLI binary not found — building it..."
+    swift build -c release --product ait 2>&1 | tail -1
+    if [ -f "$RELEASE_DIR/ait" ]; then
+        cp "$RELEASE_DIR/ait" "$APP_BUNDLE/Contents/MacOS/ait"
+        chmod +x "$APP_BUNDLE/Contents/MacOS/ait"
+        echo "  ✓ CLI binary (ait) bundled"
+    fi
+fi
 
 # ── Step 4: Generate Info.plist ──
 echo "  [4/5] Writing Info.plist..."

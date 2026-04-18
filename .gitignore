@@ -18,6 +18,10 @@ DerivedData/
 # macOS
 .DS_Store
 **/.DS_Store
+
+# npm
+node_modules/
+package-lock.json
 .AppleDouble
 .LSOverride
 

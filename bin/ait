@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+"use strict";
+
+const { execFileSync, execSync } = require("child_process");
+const path = require("path");
+const fs = require("fs");
+
+// The native binary is built by postinstall into .build/release/ait
+const projectRoot = path.resolve(__dirname, "..");
+const nativeBin = path.join(projectRoot, ".build", "release", "ait");
+
+if (!fs.existsSync(nativeBin)) {
+  console.error(
+    "Error: ait binary not found. Run 'npm run build' or 'swift build -c release --product ait'"
+  );
+  process.exit(1);
+}
+
+// Forward all arguments to the native binary
+try {
+  execFileSync(nativeBin, process.argv.slice(2), { stdio: "inherit" });
+} catch (e) {
+  process.exit(e.status || 1);
+}

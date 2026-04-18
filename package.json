@@ -1,0 +1,52 @@
+{
+  "name": "ai-terminal-app",
+  "version": "2.1.0",
+  "description": "Native macOS terminal with 23 AI providers built in. Errors get analyzed. Commands get explained. Dangerous operations get blocked.",
+  "keywords": [
+    "terminal",
+    "ai",
+    "cli",
+    "macos",
+    "swift",
+    "openai",
+    "claude",
+    "gemini",
+    "ollama",
+    "groq",
+    "deepseek",
+    "developer-tools"
+  ],
+  "homepage": "https://github.com/3289david/ai-terminal",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3289david/ai-terminal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/3289david/ai-terminal/issues"
+  },
+  "license": "MIT",
+  "author": "3289david",
+  "bin": {
+    "ait": "./bin/ait"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js",
+    "build": "swift build -c release --product ait",
+    "test": "swift test"
+  },
+  "os": [
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "bin/",
+    "scripts/postinstall.js",
+    "Sources/",
+    "Package.swift",
+    "Package.resolved",
+    "LICENSE",
+    "README.md"
+  ]
+}
