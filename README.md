@@ -101,7 +101,7 @@ Built with SwiftUI + real PTY. 23 AI providers. Errors get analyzed. Commands ge
 ### Download the DMG (easiest)
 
 ```bash
-git clone https://github.com/danwoo1234/ai-terminal.git
+git clone https://github.com/3289david/ai-terminal.git
 cd ai-terminal
 make dmg
 ```
@@ -137,7 +137,7 @@ cp .build/release/ait /usr/local/bin/
 ### Homebrew (coming soon)
 
 ```bash
-brew tap danwoo1234/tap
+brew tap 3289david/tap
 brew install ai-terminal
 ```
 
@@ -387,7 +387,7 @@ Contributions are welcome! Here's how to get started:
 
 ```bash
 # Fork and clone
-git clone https://github.com/danwoo1234/ai-terminal.git
+git clone https://github.com/3289david/ai-terminal.git
 cd ai-terminal
 
 # Build and run the .app
