@@ -1,6 +1,6 @@
 {
   "name": "ai-terminal-app",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Native macOS terminal with 23 AI providers built in. Errors get analyzed. Commands get explained. Dangerous operations get blocked.",
   "keywords": [
     "terminal",
