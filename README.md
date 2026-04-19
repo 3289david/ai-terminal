@@ -487,6 +487,18 @@ swift run ait -i
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
+<div align="center">
+
+## SUPPORT
+
+Support us! 
+
+[https://buymeacoffee.com/rukkitofficial](url)
+
+THanks for Your support!!!
+  
+</div>
+---
 
 <div align="center">
 
