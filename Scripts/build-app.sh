@@ -9,7 +9,7 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_NAME="AI Terminal"
 BUNDLE_ID="com.aiterminal.app"
-VERSION="2.0.0"
+VERSION="3.0.0"
 BUILD_DIR="$PROJECT_DIR/.build"
 RELEASE_DIR="$BUILD_DIR/release"
 APP_BUNDLE="$BUILD_DIR/${APP_NAME}.app"

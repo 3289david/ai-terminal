@@ -8,7 +8,7 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_NAME="AI Terminal"
-VERSION="2.0.0"
+VERSION="3.0.0"
 BUILD_DIR="$PROJECT_DIR/.build"
 APP_BUNDLE="$BUILD_DIR/${APP_NAME}.app"
 DMG_STAGING="$BUILD_DIR/dmg-staging"

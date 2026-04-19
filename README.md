@@ -65,7 +65,8 @@ Built with SwiftUI + real PTY. 23 AI providers. Errors get analyzed. Commands ge
 | ⚡ **Token Streaming** | AI responses stream in real-time, token-by-token. Groq and Cerebras deliver under 1 second. |
 | 💡 **Command Suggestions** | AI extracts runnable commands from responses with safety ratings (✓ Safe / ⚠ Caution / ✕ Blocked). |
 | 🛡️ **Safety Layer** | Blocks `rm -rf /`, fork bombs, `dd` on disks. Warns on `sudo`, `git push --force`, `DROP TABLE`. |
-| 🔐 **Secret Leak Detection** | Warns if API keys, GitHub tokens, or Slack tokens appear in commands or output. |
+| � **Full API Key Management** | Configure API keys for all 23 providers. Auto-detects keys from environment variables. Dashboard links for every provider. |
+| �🔐 **Secret Leak Detection** | Warns if API keys, GitHub tokens, or Slack tokens appear in commands or output. |
 | 📑 **Multi-Session** | Multiple terminal tabs, each with its own PTY process and AI conversation context. |
 | 🧠 **Memory Store** | Remembers past errors and solutions. Feeds them back to AI for smarter, project-aware answers. |
 | 📂 **Context Engine** | Auto-detects project type (Node, Python, Rust, Go, Swift, etc.), git branch, and dependencies. |
@@ -117,7 +118,7 @@ cd ai-terminal
 make dmg
 ```
 
-This builds `AI Terminal-2.0.0.dmg` in `.build/`. Open it, drag **AI Terminal.app** to Applications — done.
+This builds `AI Terminal-3.0.0.dmg` in `.build/`. Open it, drag **AI Terminal.app** to Applications — done.
 
 > **Auto CLI install**: When you launch the `.app` for the first time, it automatically installs `ait` to `/usr/local/bin/`. No extra steps needed — the CLI is ready to use in any terminal.
 
@@ -165,7 +166,7 @@ brew install ai-terminal
 
 | Target | Description |
 |--------|-------------|
-| `make dmg` | Build `AI Terminal-2.0.0.dmg` drag-to-install package |
+| `make dmg` | Build `AI Terminal-3.0.0.dmg` drag-to-install package |
 | `make app` | Build `AI Terminal.app` in `.build/` (bundles `ait` CLI inside) |
 | `make install` | Build `.app` and copy to `/Applications` |
 | `make run` | Build `.app` and launch it |
@@ -279,12 +280,47 @@ ait -i
 
 ### GUI
 
-Open **Settings** (`⌘ ,`) to configure providers. Local providers and Pollinations work out of the box — just set API keys for cloud providers.
+Open **Settings** (`⌘ ,`) to configure providers. Every provider has:
+- **API Key** field (SecureField with paste support)
+- **"Get API Key"** link to the provider's dashboard
+- **Model** and **Endpoint** override fields
+- **Test Connection** button to verify your key works
+- **Env var badge** when a key is detected from the environment
+
+Local providers and Pollinations work out of the box — no keys needed.
+
+### Environment Variables
+
+API keys are automatically detected from environment variables. Set them in your shell profile (`~/.zshrc`):
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export GOOGLE_API_KEY="AI..."
+export GROQ_API_KEY="gsk_..."
+export MISTRAL_API_KEY="..."
+export COHERE_API_KEY="..."
+export XAI_API_KEY="..."
+export DEEPSEEK_API_KEY="..."
+export AI21_API_KEY="..."
+export CEREBRAS_API_KEY="..."
+export SAMBANOVA_API_KEY="..."
+export FIREWORKS_API_KEY="..."
+export TOGETHER_API_KEY="..."
+export LEPTON_API_KEY="..."
+export OPENROUTER_API_KEY="..."
+export DEEPINFRA_API_KEY="..."
+export PERPLEXITY_API_KEY="..."
+export HF_TOKEN="hf_..."
+export REPLICATE_API_TOKEN="r8_..."
+```
+
+Priority: stored key (from Settings/config) → environment variable → empty.
 
 ### CLI
 
 ```bash
-# Interactive config wizard
+# Interactive config wizard (shows env vars + dashboard links)
 ait --config
 
 # Config files

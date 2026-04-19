@@ -12,7 +12,7 @@ import Glibc
 // ║  Deploy: brew install ai-terminal-cli / choco install ait      ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
-let VERSION = "2.0.0"
+let VERSION = "3.0.0"
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MARK: - ANSI Terminal Colors
@@ -156,6 +156,58 @@ enum Provider: String, CaseIterable {
 
     var isLocal: Bool { self == .ollama || self == .lmstudio }
 
+    /// Environment variable name to check for API key fallback
+    var envKeyName: String? {
+        switch self {
+        case .openai:       return "OPENAI_API_KEY"
+        case .anthropic:    return "ANTHROPIC_API_KEY"
+        case .google:       return "GOOGLE_API_KEY"
+        case .mistral:      return "MISTRAL_API_KEY"
+        case .cohere:       return "COHERE_API_KEY"
+        case .xai:          return "XAI_API_KEY"
+        case .deepseek:     return "DEEPSEEK_API_KEY"
+        case .ai21:         return "AI21_API_KEY"
+        case .groq:         return "GROQ_API_KEY"
+        case .cerebras:     return "CEREBRAS_API_KEY"
+        case .sambanova:    return "SAMBANOVA_API_KEY"
+        case .fireworks:    return "FIREWORKS_API_KEY"
+        case .together:     return "TOGETHER_API_KEY"
+        case .lepton:       return "LEPTON_API_KEY"
+        case .openrouter:   return "OPENROUTER_API_KEY"
+        case .deepinfra:    return "DEEPINFRA_API_KEY"
+        case .perplexity:   return "PERPLEXITY_API_KEY"
+        case .huggingface:  return "HF_TOKEN"
+        case .replicate:    return "REPLICATE_API_TOKEN"
+        default:            return nil
+        }
+    }
+
+    /// URL to the provider's API key / dashboard page
+    var apiKeyURL: String? {
+        switch self {
+        case .openai:       return "https://platform.openai.com/api-keys"
+        case .anthropic:    return "https://console.anthropic.com/settings/keys"
+        case .google:       return "https://aistudio.google.com/apikey"
+        case .mistral:      return "https://console.mistral.ai/api-keys"
+        case .cohere:       return "https://dashboard.cohere.com/api-keys"
+        case .xai:          return "https://console.x.ai"
+        case .deepseek:     return "https://platform.deepseek.com/api_keys"
+        case .ai21:         return "https://studio.ai21.com/account/api-key"
+        case .groq:         return "https://console.groq.com/keys"
+        case .cerebras:     return "https://cloud.cerebras.ai"
+        case .sambanova:    return "https://cloud.sambanova.ai/apis"
+        case .fireworks:    return "https://fireworks.ai/account/api-keys"
+        case .together:     return "https://api.together.xyz/settings/api-keys"
+        case .lepton:       return "https://dashboard.lepton.ai"
+        case .openrouter:   return "https://openrouter.ai/keys"
+        case .deepinfra:    return "https://deepinfra.com/dash/api_keys"
+        case .perplexity:   return "https://www.perplexity.ai/settings/api"
+        case .huggingface:  return "https://huggingface.co/settings/tokens"
+        case .replicate:    return "https://replicate.com/account/api-tokens"
+        default:            return nil
+        }
+    }
+
     enum ClientKind { case ollama, pollinations, anthropic, google, openaiCompatible }
 
     var clientKind: ClientKind {
@@ -178,7 +230,17 @@ struct CLIConfig: Codable {
     var models: [String: String] = [:]
     var endpoints: [String: String] = [:]
 
-    func apiKey(for p: Provider) -> String { apiKeys[p.displayName] ?? "" }
+    /// Returns the API key for a provider: stored key → environment variable → empty
+    func apiKey(for p: Provider) -> String {
+        let stored = apiKeys[p.displayName] ?? ""
+        if !stored.isEmpty { return stored }
+        if let envName = p.envKeyName,
+           let envValue = ProcessInfo.processInfo.environment[envName],
+           !envValue.isEmpty {
+            return envValue
+        }
+        return ""
+    }
     func model(for p: Provider) -> String {
         let s = models[p.displayName] ?? ""
         return s.isEmpty ? p.defaultModel : s
@@ -1228,8 +1290,17 @@ func configWizard() async {
     var hasAny = false
     for p in Provider.allCases where p != .auto {
         let key = config.apiKey(for: p)
+        let storedKey = config.apiKeys[p.displayName] ?? ""
+        let fromEnv = storedKey.isEmpty && !key.isEmpty
         if !p.requiresAPIKey || !key.isEmpty {
-            let status = p.requiresAPIKey ? "\(C.green)✓\(C.reset) key set" : "\(C.dim)no key needed\(C.reset)"
+            let status: String
+            if !p.requiresAPIKey {
+                status = "\(C.dim)no key needed\(C.reset)"
+            } else if fromEnv {
+                status = "\(C.green)✓\(C.reset) from env (\(p.envKeyName ?? ""))"
+            } else {
+                status = "\(C.green)✓\(C.reset) key set"
+            }
             let padded = p.displayName.padding(toLength: 16, withPad: " ", startingAt: 0)
             print("  \(padded) \(status)  model: \(C.white)\(config.model(for: p))\(C.reset)")
             hasAny = true
@@ -1238,6 +1309,7 @@ func configWizard() async {
     if !hasAny { print("  \(C.dim)None. Pollinations (free) is always available.\(C.reset)") }
 
     print()
+    print("\(C.dim)Tip: Keys are auto-detected from env vars (e.g. OPENAI_API_KEY)\(C.reset)")
     print("Enter provider name to configure (or \(C.cyan)done\(C.reset)): ", terminator: "")
     fflush(stdout)
 
@@ -1254,6 +1326,12 @@ func configWizard() async {
         }
 
         if p.requiresAPIKey {
+            if let url = p.apiKeyURL {
+                print("  \(C.dim)Get key: \(url)\(C.reset)")
+            }
+            if let envName = p.envKeyName {
+                print("  \(C.dim)Or set env var: export \(envName)=your-key\(C.reset)")
+            }
             print("  API key for \(p.displayName): ", terminator: "")
             fflush(stdout)
             if let key = readLine()?.trimmingCharacters(in: .whitespaces), !key.isEmpty {
@@ -1295,19 +1373,25 @@ func listProviders(config: CLIConfig) {
             print("  \(C.cyan)\(C.bold)\(currentCat)\(C.reset)")
         }
         let key = config.apiKey(for: p)
+        let storedKey = config.apiKeys[p.displayName] ?? ""
+        let fromEnv = storedKey.isEmpty && !key.isEmpty
         let status: String
         if !p.requiresAPIKey {
             status = "\(C.green)● ready\(C.reset)"
+        } else if !key.isEmpty && fromEnv {
+            status = "\(C.green)● env\(C.reset)  "
         } else if !key.isEmpty {
-            status = "\(C.green)● key set\(C.reset)"
+            status = "\(C.green)● key\(C.reset)  "
         } else {
-            status = "\(C.dim)○ needs key\(C.reset)"
+            status = "\(C.dim)○ no key\(C.reset)"
         }
         let name = p.displayName.padding(toLength: 16, withPad: " ", startingAt: 0)
         let model = config.model(for: p)
-        print("    \(name) \(status)  \(C.dim)\(model)\(C.reset)")
+        let envHint = p.envKeyName.map { fromEnv ? " \(C.dim)(\($0))\(C.reset)" : "" } ?? ""
+        print("    \(name) \(status)  \(C.dim)\(model)\(C.reset)\(envHint)")
     }
     print()
+    print("\(C.dim)Keys auto-detected from environment variables (e.g. OPENAI_API_KEY)\(C.reset)")
     print("\(C.dim)Run --config or /config to set API keys.\(C.reset)")
 }
 
