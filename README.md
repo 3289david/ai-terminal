@@ -6,7 +6,8 @@
 <img src="https://img.shields.io/badge/.app-Bundle-8B5CF6?style=flat-square" alt=".app Bundle">
 <img src="https://img.shields.io/npm/v/ai-terminal-app?style=flat-square&logo=npm&color=CB3837" alt="npm">
 <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
-<img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome"><br>
+<img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome"><br><br><br><br>
+
 <a href="https://3289david.github.io/ai-terminal" target="_blank"><img src="https://img.shields.io/badge/Github%20Pages-Website-brightgreen?style=for-the-badge" alt="Website"></a>
 <a href="https://www.npmjs.com/package/ai-terminal-app" target="_blank"><img src="https://img.shields.io/badge/NPM%20Package-V3.1.0-brightgreen?style=for-the-badge" alt="NPM package"></a>
 
