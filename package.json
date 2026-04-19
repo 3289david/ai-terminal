@@ -27,7 +27,7 @@
   "license": "MIT",
   "author": "3289david",
   "bin": {
-    "ait": "./bin/ait"
+    "ait": "bin/ait"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
