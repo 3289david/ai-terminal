@@ -68,19 +68,23 @@ final class AIRouter {
     // MARK: - Routing
 
     /// Resolve `.auto` to the best concrete provider.
-    /// Priority: Local > Fast free-tier > Cheap cloud > Premium > Aggregator > Free fallback
+    /// Priority: Fast inference (free tiers) > Cloud (with keys) > Local > Aggregator > Free fallback
     func resolveProvider(_ selected: AIProviderType) -> AIProviderType {
         guard selected == .auto else { return selected }
 
         let priority: [AIProviderType] = [
-            .ollama, .lmstudio,
+            // Fast inference first — sub-second, usually free tier
             .groq, .cerebras, .sambanova,
-            .deepseek,
-            .openai, .anthropic, .google, .mistral, .xai,
-            .openrouter,
-            .together, .fireworks, .lepton, .deepinfra,
-            .perplexity, .huggingface, .replicate,
+            // Cloud providers with real models
+            .openai, .anthropic, .google, .mistral, .xai, .deepseek,
+            // Local (always available if running, but shouldn't override cloud if user set keys)
+            .ollama, .lmstudio,
+            // Other cloud
+            .fireworks, .together, .lepton,
+            // Aggregators
+            .openrouter, .deepinfra, .perplexity, .huggingface, .replicate,
             .cohere, .ai21,
+            // Free fallback
             .pollinations
         ]
 

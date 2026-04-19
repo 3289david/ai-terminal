@@ -54,6 +54,12 @@ struct ContentView: View {
         .onChange(of: appState.activeSessionID) { _, newID in
             ensureVM(for: newID)
         }
+        .onChange(of: appState.providerConfig) { _, newConfig in
+            // Reconfigure all existing session routers when user changes API keys/settings
+            for (_, vm) in viewModels {
+                vm.reconfigure(with: newConfig)
+            }
+        }
         .onChange(of: appState.sessions.count) { oldCount, newCount in
             if newCount > oldCount, let id = appState.activeSessionID {
                 ensureVM(for: id)

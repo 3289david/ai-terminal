@@ -61,6 +61,14 @@ final class TerminalViewModel {
         isRunning = true
     }
 
+    /// Reconfigure the AI router with updated provider config (e.g. after Settings changes)
+    func reconfigure(with config: ProviderConfig) {
+        aiRouter.configure(with: config)
+        Task {
+            await aiRouter.refreshAvailability()
+        }
+    }
+
     func stop() {
         parseTimer?.invalidate()
         parseTimer = nil

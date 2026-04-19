@@ -5,7 +5,10 @@ struct ProviderSelector: View {
 
     var body: some View {
         Menu {
-            Button(action: { appState.selectedProvider = .auto }) {
+            Button(action: {
+                appState.selectedProvider = .auto
+                appState.saveSettings()
+            }) {
                 HStack {
                     Label("Auto - Best available", systemImage: AIProviderType.auto.icon)
                     if appState.selectedProvider == .auto {
