@@ -12,7 +12,7 @@ import Glibc
 // ║  Deploy: brew install ai-terminal-cli / choco install ait      ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
-let VERSION = "3.1.0"
+let VERSION = "3.2.0"
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MARK: - ANSI Terminal Colors

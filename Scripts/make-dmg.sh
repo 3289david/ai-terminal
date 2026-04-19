@@ -8,7 +8,7 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_NAME="AI Terminal"
-VERSION="3.1.0"
+VERSION="3.2.0"
 BUILD_DIR="$PROJECT_DIR/.build"
 APP_BUNDLE="$BUILD_DIR/${APP_NAME}.app"
 DMG_STAGING="$BUILD_DIR/dmg-staging"
@@ -180,7 +180,7 @@ func renderBackground(pixels: Int) -> NSBitmapImageRep {
         .foregroundColor: NSColor(red: 0.55, green: 0.72, blue: 0.90, alpha: 0.40),
         .paragraphStyle: paraStyle,
     ]
-    let verText = "v\(CommandLine.arguments.count > 3 ? CommandLine.arguments[3] : "3.1.0")"
+    let verText = "v\(CommandLine.arguments.count > 3 ? CommandLine.arguments[3] : "3.2.0")"
     let verRect = CGRect(x: w * 0.35, y: h * 0.075, width: w * 0.30, height: h * 0.07)
     verText.draw(in: verRect, withAttributes: verAttrs)
 

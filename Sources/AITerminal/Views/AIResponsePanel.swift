@@ -72,13 +72,25 @@ struct AIResponsePanel: View {
                     .foregroundColor(Theme.textMuted)
             }
 
-            if viewModel.aiProvider != .auto {
-                Label(viewModel.aiProvider.rawValue, systemImage: viewModel.aiProvider.icon)
+            // Show selected provider (and resolved provider if different, e.g. in Auto mode)
+            let selected = appState.selectedProvider
+            let resolved = viewModel.aiProvider
+            if selected == .auto && resolved != .auto {
+                // Auto mode: show which provider was actually used
+                Label("\(selected.rawValue) → \(resolved.rawValue)", systemImage: resolved.icon)
                     .font(Theme.captionFont)
-                    .foregroundColor(Theme.textSecondary)
+                    .foregroundColor(Theme.accent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.cardBackground)
+                    .background(Theme.accent.opacity(0.1))
+                    .cornerRadius(Theme.cornerRadiusSmall)
+            } else if selected != .auto {
+                Label(selected.rawValue, systemImage: selected.icon)
+                    .font(Theme.captionFont)
+                    .foregroundColor(Theme.accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Theme.accent.opacity(0.1))
                     .cornerRadius(Theme.cornerRadiusSmall)
             }
 

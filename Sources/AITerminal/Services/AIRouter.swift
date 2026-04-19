@@ -42,6 +42,7 @@ final class AIRouter {
                 )
             }
         }
+        print("[AIRouter] configure() — clients created: \(clients.keys.map(\.rawValue).sorted())")
     }
 
     // MARK: - Availability
@@ -102,6 +103,7 @@ final class AIRouter {
         provider: AIProviderType
     ) async throws -> (String, AIProviderType) {
         let resolved = resolveProvider(provider)
+        print("[AIRouter] complete() called — selected: \(provider.rawValue), resolved: \(resolved.rawValue), client exists: \(clients[resolved] != nil)")
         guard let client = clients[resolved] else {
             throw AIError.providerUnavailable
         }
@@ -117,9 +119,20 @@ final class AIRouter {
         provider: AIProviderType
     ) -> (AsyncThrowingStream<String, Error>, AIProviderType) {
         let resolved = resolveProvider(provider)
+        print("[AIRouter] stream() called — selected: \(provider.rawValue), resolved: \(resolved.rawValue), client exists: \(clients[resolved] != nil)")
         guard let client = clients[resolved] else {
-            let errStream = AsyncThrowingStream<String, Error> {
-                $0.finish(throwing: AIError.providerUnavailable)
+            // Build a clear error message
+            let reason: String
+            if provider == .auto {
+                reason = "No providers are configured. Go to Settings (⌘,) and add an API key."
+            } else if provider.requiresAPIKey {
+                reason = "\(provider.rawValue) requires an API key. Go to Settings (⌘,) → \(provider.rawValue) and enter your key."
+            } else {
+                reason = "\(provider.rawValue) is not available. Check that it's running."
+            }
+            let errStream = AsyncThrowingStream<String, Error> { continuation in
+                continuation.yield("[Provider Error] \(reason)")
+                continuation.finish()
             }
             return (errStream, resolved)
         }
